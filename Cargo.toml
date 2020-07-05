@@ -1,6 +1,6 @@
 [package]
 name = "fastredis"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["wellinthatcase"]
 edition = "2018"
 description = "A small, hyper fast Python binding exposing a simple interface to Redis commands."

@@ -1,3 +1,25 @@
+// MIT License
+//
+// Copyright (c) 2020 wellinthatcase
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 use redis::*;
 use pyo3::{
     prelude::*,
@@ -71,21 +93,25 @@ impl RedisClient {
     // [1] -> If the connection supports pipelining.
     // [2] -> The URL of the Redis client.
     #[text_signature = "($self)"]
-    pub fn info(&self) -> PyResult<(String, String, String)> {
+    pub fn info(&self) -> PyResult<(i64, bool, &str)> {
         Ok((
-            format!("Data Num#: {}", &self.client.get_db()),
-            format!("Pipelined: {}", &self.connection.supports_pipelining()),
-            format!("Redis URL: {}", &self.url)
+            self.client.get_db(),
+            self.connection.supports_pipelining(),
+            &self.url
         ))
     }
 
     // Delete the specified keys. Keys will be ignored if they do not exist.
     //
-    // Integer reply:
+    // Time Complexity: 
+    //  O(N) where N is the number of keys that will be removed. 
+    //  When a key to remove holds a value other than a string, the individual complexity for this key 
+    //  is O(M) where M is the number of elements in the list, set, sorted set or hash. 
+    //  Removing a single key that holds a string value is O(1).
+    //
+    // Integer Reply:
     //  The amount of keys deleted.
     // 
-    // Time Complexity: O(n)
-    //
     // https://redis.io/commands/del
     #[text_signature = "($self, keys)"]
     pub fn delete(&mut self, keys: Vec<&str>) -> PyResult<i8> {
@@ -102,7 +128,10 @@ impl RedisClient {
     // Bulk string reply:
     //  The serialized value.
     //
-    // Time Complexity: O(1)
+    // Time Complexity:
+    //  O(1) to access the key and additional O(N*M) to serialized it, 
+    //  where N is the number of Redis objects composing the value and M their average size. 
+    //  For small string values the time complexity is thus O(1)+O(1*M) where M is small, so simply O(1).
     //
     // https://redis.io/commands/dump
     #[text_signature = "($self, key)"]
@@ -115,6 +144,8 @@ impl RedisClient {
     }
 
     // Check if a key exists. 
+    // 
+    // You must pass a Tuple, or List to this for the argument.
     //
     // Integer reply:
     //  The amount of keys that exist in Redis from the passed sequence.
@@ -134,6 +165,9 @@ impl RedisClient {
     // Set a timeout on a key. After the timeout expires, the key will be deleted.
     // Keys with this behavior are refeered to as volatile keys in Redis.
     // 
+    // It is possible to call expire using as argument a key that already has an existing expire set. 
+    // In this case the time to live of a key is updated to the new value
+    //
     // Integer reply:
     //  1: The timeout was set.
     //  0: The timeout was not set. Input was not an integer, key doesn't exist, etc.
@@ -152,6 +186,11 @@ impl RedisClient {
 
     // Set a timeout on a key with a UNIX timestamp. After the timeout expires, the key will be deleted.
     // Keys with this behavior are refeered to as volatile keys in Redis.
+    //
+    // EXPIREAT has the same effect and semantic as EXPIRE, 
+    // but instead of specifying the number of seconds representing the TTL (time to live), 
+    // it takes an absolute UNIX timestamp (seconds since January 1, 1970). 
+    // A timestamp in the past will delete the key immediately.
     //
     // Integer Reply:
     //  1: The timeout was set.
@@ -175,7 +214,9 @@ impl RedisClient {
     // Sequence Reply:
     //  A sequence of the keys matching the passed pattern.
     //
-    // Time Complexity: O(n)
+    // Time Complexity:
+    //  O(N) with N being the number of keys in the database, 
+    //  under the assumption that the key names in the database and the given pattern have limited length.
     //
     // https://redis.io/commands/keys
     #[text_signature = "($self, pattern)"]
