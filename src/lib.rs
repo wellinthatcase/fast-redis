@@ -5,17 +5,17 @@ use pyo3::{
 };
 
 #[pyclass]
-struct HyperRedisClient {
+struct RedisClient {
     client: redis::Client,             // The internal Redis client.
     connection: redis::Connection,     // The internal Redis connection.
     url: String,                       // The url used to establish the Redis client.
     o: Option<PyObject>                // Used to support the CPython Garbage Collection protocol.
 }
 
-unsafe impl PyNativeType for HyperRedisClient {}
+unsafe impl PyNativeType for RedisClient {}
 
 #[pyproto]
-impl PyGCProtocol for HyperRedisClient {
+impl PyGCProtocol for RedisClient {
     fn __traverse__(&self, visit: PyVisit) -> Result<(), PyTraverseError> {
         if let Some(ref object) = self.o {
             visit.call(object)?
@@ -31,7 +31,7 @@ impl PyGCProtocol for HyperRedisClient {
 }
 
 #[pymethods]
-impl HyperRedisClient {
+impl RedisClient {
     #[new]
     fn __new__(url: String) -> PyResult<PyClassInitializer<Self>> {
         let client: redis::Client = redis::Client::open(url.as_ref())
@@ -39,7 +39,7 @@ impl HyperRedisClient {
         let connection: redis::Connection = client.get_connection()
             .expect("could not establish a connection with the Redis client. Is the server running?");
 
-        let instance: HyperRedisClient = HyperRedisClient {
+        let instance: RedisClient = RedisClient {
             o: None,
             url: url,
             client: client,
@@ -189,7 +189,7 @@ impl HyperRedisClient {
 }
 
 #[pymodule]
-fn hyperredis(_py: Python, _m: &PyModule) -> PyResult<()> {
-    _m.add_class::<HyperRedisClient>()?;
+fn fastredis(_py: Python, _m: &PyModule) -> PyResult<()> {
+    _m.add_class::<RedisClient>()?;
     Ok(())
 }
