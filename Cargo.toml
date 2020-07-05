@@ -1,0 +1,14 @@
+[package]
+name = "hyperredis"
+version = "0.1.0"
+authors = ["wellinthatcase"]
+edition = "2018"
+description = "A small, hyper fast Python binding exposing a simple interface to Redis commands."
+
+[lib]
+name = 'hyperredis'
+crate-type = ["cdylib"]
+
+[dependencies]
+redis = "0.16.0"
+pyo3 = "0.11.1"

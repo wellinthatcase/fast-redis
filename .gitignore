@@ -1,0 +1,7 @@
+/target
+/Cargo.lock
+/.vscode
+/env
+hyperredis.cpython-38-x86_64-linux-gnu.so
+__pycache__
+i.py
