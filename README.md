@@ -12,10 +12,6 @@ suredis strongly supports the following:
 suredis partially supports the following: 
   - Advanced commands. Mostly through the `manual` method as of now.
 
-  An advanced command would be a command that is not directly applicable to data management. 
-    - Commands like "ACL CAT", "BGREWRITEAOF", etc, are advanced commands that don't directly interact with data. 
-    - Commands like "SET", "LPUSH", "DEL", etc, are very directly involved in data management and have strong support.
-
 suredis has plans to implement or enhance the following (in no particular order):
   - Async.
   - Sorted Sets.
