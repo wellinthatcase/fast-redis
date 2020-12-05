@@ -1,3 +1,9 @@
+# Notice
+Suredis has been archived. 
+The code is brisk & rusty (heh) as well to being poorly representative of what I intend on writing in regards to quality.
+
+Though this did cement one thing, Rust is awesome. 
+
 # suredis
 A speedy & simplistic library at runtime for an incredibly straightforward Redis interface.
 
@@ -61,7 +67,7 @@ If you plan on contributing, try and make your contribution stay with the flow o
   - For example, no documentation that is blatantly much different from the current documentation style.
 
 # Information
-  This is a learner's project.
+  This is a learner's project only.
 
   I encourage you to give the package a shot, report any problems, and give as many suggestions as possible.
 
